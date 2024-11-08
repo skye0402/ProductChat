@@ -1,0 +1,3 @@
+npx create-next-app@latest product-master-chat --typescript --tailwind --app
+cd product-master-chat
+npm install @sap-ai-sdk/foundation-models @sap-ai-sdk/langchain @langchain/community @langchain/core hdb 
