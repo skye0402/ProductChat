@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@langchain/community": "^0.3.11",
+    "@langchain/community": "^0.3.12",
     "@langchain/core": "^0.3.17",
     "@langchain/openai": "^0.3.11",
     "@sap-ai-sdk/foundation-models": "^1.2.0",
@@ -22,11 +22,12 @@
     "autoprefixer": "^10.4.20",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
+    "chrome-net": "^3.3.4",
     "crypto-browserify": "^3.12.1",
     "hdb": "^0.19.10",
     "https-browserify": "^1.0.0",
     "langchain": "^0.3.5",
-    "next": "^15.0.2",
+    "next": "^15.0.3",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.47",

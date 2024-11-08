@@ -7,7 +7,7 @@ import {
     HanaDBArgs,
   } from "@langchain/community/vectorstores/hanavector";
 
-export class SapAiClient {
+export class SapAiEmbeddingClient {
   private embeddings: AzureOpenAiEmbeddingClient;
   private vectorStore: HanaDB;
   private args: HanaDBArgs;
@@ -70,28 +70,8 @@ export class SapAiClient {
         industry: product.IndustryStandardName
       }
     }));
-
     // First clear the vector store
     await this.clearVectorStore();
-    console.log(process.env.AICORE_SERVICE_KEY);
-    // Get embeddings for each document's content
-    const texts = docs.map(doc => doc.pageContent);
-
-    // Ensure the environment variable is defined
-    const serviceKey = process.env['AICORE_SERVICE_KEY'] || '{}';
-    const credentials = JSON.parse(serviceKey);
-    console.log(credentials);
-    console.log(JSON.stringify(credentials));
-    
-    try {
-      const embeddings = await this.embeddings.embedDocuments(texts);
-    } catch (error: any) {
-        const cause = error.cause
-        console.error("An error occurred:", cause);
-    }
-    console.log('Embeddings:', this.embeddings);
-
-
     // Add the documents to the vector store
     await this.vectorStore.addDocuments(docs);
   }
@@ -111,5 +91,9 @@ export class SapAiClient {
     });
     
     return response.json();
+  }
+
+  getVectorStore() {
+    return this.vectorStore;
   }
 } 

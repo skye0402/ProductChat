@@ -1,5 +1,5 @@
 import { initializeEnvironment } from '@/lib/init';
-import { SapAiClient } from '@/lib/sap-ai-client';
+import { SapAiEmbeddingClient } from '@/lib/sap-ai-embedding-client';
 import { SapApiClient } from '@/lib/sap-api-client';
 import { NextResponse } from 'next/server';
 
@@ -8,11 +8,11 @@ export async function POST(request: Request) {
 //   initializeEnvironment();
 
   const { action, matchcode } = await request.json();
-  let aiClient: SapAiClient | null = null;
+  let aiClient: SapAiEmbeddingClient | null = null;
 
   try {
     if (action === 'clear') {
-      aiClient = new SapAiClient();
+      aiClient = new SapAiEmbeddingClient();
       await aiClient.initialize();
       await aiClient.clearVectorStore();
       return NextResponse.json({ message: 'Vector store cleared successfully' });
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     if (action === 'load' && matchcode) {
       const apiClient = new SapApiClient();
-      aiClient = new SapAiClient();
+      aiClient = new SapAiEmbeddingClient();
       await aiClient.initialize();
 
       const products = await apiClient.searchProducts(matchcode);
