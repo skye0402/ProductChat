@@ -6,6 +6,7 @@ import {
     HanaDB,
     HanaDBArgs,
   } from "@langchain/community/vectorstores/hanavector";
+import { SapApiClient } from './sap-api-client';
 
 export class SapAiEmbeddingClient {
   private embeddings: AzureOpenAiEmbeddingClient;
@@ -62,8 +63,22 @@ export class SapAiEmbeddingClient {
   }
 
   async embedProducts(products: any[]) {
-    const docs = products.map(product => new Document({
-      pageContent: `${product.description}\n\n` +
+    const sapClient = new SapApiClient();
+    
+    // Fetch images for all products in parallel
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        const image = await sapClient.getProductImage(product.id);
+        return {
+          ...product,
+          image
+        };
+      })
+    );
+
+    const docs = productsWithImages.map(product => new Document({
+      pageContent: `Product ID: ${product.id}\n\n` +
+                   `${product.description}\n\n` +
                    `Sales Text: ${product.salesText}\n\n` +
                    `Physical Properties:\n` +
                    `- Volume: ${product.volume.value} ${product.volume.unit}\n` +
@@ -73,9 +88,14 @@ export class SapAiEmbeddingClient {
       metadata: {
         id: product.id,
         type: 'product',
-        baseUnit: product.baseUnit
+        baseUnit: product.baseUnit,
+        image: product.image ? {
+          data: product.image.base64,
+          mimeType: product.image.mimeType
+        } : null
       }
     }));
+
     // First clear the vector store
     await this.clearVectorStore();
     // Add the documents to the vector store

@@ -5,6 +5,16 @@ import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { HanaDB } from "@langchain/community/vectorstores/hanavector";
 
+interface ProductMetadata {
+  id: string;
+  type: string;
+  baseUnit: string;
+  image: {
+    data: string;
+    mimeType: string;
+  } | null;
+}
+
 export class SapAiChatClient {
   private chatClient: AzureOpenAiChatClient;
   private chain: any;
@@ -26,27 +36,20 @@ export class SapAiChatClient {
     const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        `You are a product expert. Always structure your response in this exact format:
+        `You are a knowledgeable product expert. Analyze the provided context and structure your response in this format:
 
-## Hand Care Products
+## Product Overview
 
-| Product Name | Product ID | Volume/Weight | Description |
-|--------------|------------|---------------|-------------|
-| Product 1 | ID1 | 75g | Description text |
-| Product 2 | ID2 | 100g | Description text |
+For each relevant product:
+- Product ID: [ID]
+  Product name and detailed analysis including benefits, use cases, and unique selling points
+  ![Product Image](product:[ID])
 
 ## Recommendation
+Provide a personalized recommendation based on the user's query, comparing relevant products and explaining the rationale.
+Include the product image reference ![Product Image](product:[ID]) for the recommended product.
 
-- Product 1: Specific recommendation
-- Product 2: Specific recommendation
-
-Additional context and final recommendation.
-
-Important formatting rules:
-1. Use exactly two newlines before and after the table
-2. Ensure table headers and content are properly aligned
-3. Use consistent spacing between pipe characters
-4. Use proper markdown headers with ##
+Use markdown for formatting. Only include products and their images that are relevant to the user's query. If the user query is not about products, politely decline to answer.
 
 Context:
 {context}`
@@ -59,7 +62,7 @@ Context:
     });
 
     this.chain = await createRetrievalChain({
-      retriever: this.vectorStore.asRetriever({ k: 3 }),
+      retriever: this.vectorStore.asRetriever({ k: 5 }),
       combineDocsChain,
     });
   }
@@ -69,10 +72,34 @@ Context:
       const response = await this.chain.invoke({
         input: message,
       });
-      return response.answer;
+      
+      let answer = response.answer;
+      
+      const productMetadata = response.context?.map((doc: any) => doc.metadata as ProductMetadata) || [];
+      
+      productMetadata.forEach((product: ProductMetadata) => {
+        if (product.image) {
+          const placeholders = [
+            `![Product Image](product:${product.id})`,
+            `![Product ${product.id}](product:${product.id})`
+          ];
+          
+          const imageMarkdown = `![Product ${product.id}](data:${product.image.mimeType};base64,${product.image.data})`;
+          
+          placeholders.forEach(placeholder => {
+            answer = answer.replace(new RegExp(escapeRegExp(placeholder), 'g'), imageMarkdown);
+          });
+        }
+      });
+      
+      return answer;
     } catch (error) {
       console.error('Chat error:', error);
       throw error;
     }
   }
+}
+
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 } 

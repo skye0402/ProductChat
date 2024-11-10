@@ -2,11 +2,13 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
+import remarkGfm from 'remark-gfm';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
-  content: string;
+  content: any;
 }
 
 export default function ChatPage() {
@@ -39,9 +41,15 @@ export default function ChatPage() {
 
       const data = await response.json();
       
+      const mdxSource = await serialize(data.answer, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+        },
+      });
+      
       const assistantMessage = {
         role: 'assistant' as const,
-        content: data.answer
+        content: mdxSource
       };
       
       setMessages(prev => [...prev, assistantMessage]);
@@ -96,29 +104,29 @@ export default function ChatPage() {
             }`}
           >
             {message.role === 'assistant' ? (
-              <div className="prose prose-sm max-w-none">
-                <ReactMarkdown
-                  className="prose prose-sm max-w-none"
+              <div className="prose prose-sm max-w-none [&_ul]:list-none [&_li]:list-none [&_li]:marker:hidden [&_li]:before:hidden [&_li]:before:content-none [&_li]:marker:content-none">
+                <MDXRemote
+                  {...message.content}
                   components={{
-                    table: props => (
-                      <table className="min-w-full my-4 divide-y divide-gray-300 border-collapse border border-gray-300" {...props} />
+                    img: (props) => (
+                      <img
+                        {...props}
+                        className="my-4 h-auto max-h-[20vh] w-auto object-contain block"
+                        style={{ marginLeft: 0 }}
+                        alt={props.alt || "Product image"}
+                      />
                     ),
-                    th: props => (
-                      <th className="px-4 py-2 border border-gray-300 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" {...props} />
+                    ul: (props) => (
+                      <ul className="!list-none !pl-0" {...props} />
                     ),
-                    td: props => (
-                      <td className="px-4 py-2 border border-gray-300 whitespace-normal text-sm text-gray-500" {...props} />
+                    li: (props) => (
+                      <li className="!list-none !pl-0" {...props} />
                     ),
-                    p: props => (
-                      <p className="mb-4" {...props} />
+                    table: (props) => (
+                      <table className="border-collapse border border-gray-300 my-4" {...props} />
                     ),
-                    h3: props => (
-                      <h3 className="text-lg font-semibold mt-6 mb-2" {...props} />
-                    )
                   }}
-                >
-                  {message.content}
-                </ReactMarkdown>
+                />
               </div>
             ) : (
               <div className="text-right">{message.content}</div>

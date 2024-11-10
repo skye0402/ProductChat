@@ -67,7 +67,10 @@ const nextConfig = {
 
     return config;
   },
-  serverExternalPackages: ['@sap-cloud-sdk', '@sap-ai-sdk']
+  serverExternalPackages: ['@sap-cloud-sdk', '@sap-ai-sdk'],
+  devIndicators: {
+    appIsrStatus: false, // This disables the static/dynamic route indicator
+  },
 };
 
 module.exports = nextConfig;
