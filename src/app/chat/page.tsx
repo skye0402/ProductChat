@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -90,11 +91,38 @@ export default function ChatPage() {
             key={index}
             className={`p-4 rounded-lg ${
               message.role === 'user'
-                ? 'bg-blue-100 ml-auto'
-                : 'bg-gray-100 mr-auto'
-            } max-w-[80%]`}
+                ? 'bg-blue-100 ml-auto max-w-[80%]'
+                : 'bg-gray-100 mr-auto w-full'
+            }`}
           >
-            {message.content}
+            {message.role === 'assistant' ? (
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown
+                  className="prose prose-sm max-w-none"
+                  components={{
+                    table: props => (
+                      <table className="min-w-full my-4 divide-y divide-gray-300 border-collapse border border-gray-300" {...props} />
+                    ),
+                    th: props => (
+                      <th className="px-4 py-2 border border-gray-300 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" {...props} />
+                    ),
+                    td: props => (
+                      <td className="px-4 py-2 border border-gray-300 whitespace-normal text-sm text-gray-500" {...props} />
+                    ),
+                    p: props => (
+                      <p className="mb-4" {...props} />
+                    ),
+                    h3: props => (
+                      <h3 className="text-lg font-semibold mt-6 mb-2" {...props} />
+                    )
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <div className="text-right">{message.content}</div>
+            )}
           </div>
         ))}
         {isLoading && (

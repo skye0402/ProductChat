@@ -26,7 +26,30 @@ export class SapAiChatClient {
     const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
       [
         "system",
-        "You are a product expert. Use the following product information to answer the question. If you don't know the answer, say you don't know. Don't make up information.\n\nContext:\n{context}"
+        `You are a product expert. Always structure your response in this exact format:
+
+## Hand Care Products
+
+| Product Name | Product ID | Volume/Weight | Description |
+|--------------|------------|---------------|-------------|
+| Product 1 | ID1 | 75g | Description text |
+| Product 2 | ID2 | 100g | Description text |
+
+## Recommendation
+
+- Product 1: Specific recommendation
+- Product 2: Specific recommendation
+
+Additional context and final recommendation.
+
+Important formatting rules:
+1. Use exactly two newlines before and after the table
+2. Ensure table headers and content are properly aligned
+3. Use consistent spacing between pipe characters
+4. Use proper markdown headers with ##
+
+Context:
+{context}`
       ],
       ["human", "{input}"]
     ]);

@@ -63,11 +63,17 @@ export class SapAiEmbeddingClient {
 
   async embedProducts(products: any[]) {
     const docs = products.map(product => new Document({
-      pageContent: `${product.Product}: ${product.to_Description?.ProductDescription || ''}\n${product.to_ProductBasicText?.ProductLongText || ''}`,
+      pageContent: `${product.description}\n\n` +
+                   `Sales Text: ${product.salesText}\n\n` +
+                   `Physical Properties:\n` +
+                   `- Volume: ${product.volume.value} ${product.volume.unit}\n` +
+                   `- Weight: ${product.weight.value} ${product.weight.unit}\n` +
+                   `- Base Unit of Measure: ${product.baseUnit}\n` +
+                   `- EAN: ${product.ean}`,
       metadata: {
-        id: product.Product,
-        type: product.ProductType,
-        industry: product.IndustryStandardName
+        id: product.id,
+        type: 'product',
+        baseUnit: product.baseUnit
       }
     }));
     // First clear the vector store
