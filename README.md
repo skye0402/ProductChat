@@ -36,7 +36,7 @@ The application consists of several key components:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/skye0402/ProductChat.git
 cd product-master-chat
 ```
 
