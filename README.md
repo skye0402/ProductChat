@@ -1,6 +1,7 @@
 # Product Master Chat Application
 
 A Next.js-based chat application that provides an AI-powered interface for querying product information from SAP S/4HANA Cloud using the Product Master API. The application leverages SAP's Generative AI Hub and HANA Vector Store for intelligent product search and recommendations.
+![Product Master Chat S/4HANA](https://github.com/user-attachments/assets/86682e35-58dc-46b8-84f8-81a61ebee890)
 
 ## Features
 
